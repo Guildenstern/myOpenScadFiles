@@ -55,17 +55,60 @@ module case(){
 }
 
 
+module hook_finn_bare(wd, hd, slit)
+{
+    o = 0.5*wd;
+  translate([o-0.25*wd,-0.5*w,0.25*hd]){ cube([0.5*wd, 2*w, 0.5*hd]); }
+  translate([o-0.30*wd,-0.5*w,0.25*hd]){ cube([0.6*wd, 0.5*w, 0.5*hd]); }
+  if(slit == true){
+    translate([o-0.25*wd,-0.5*w,-10]){ cube([0.5*wd, 2*w, 0.5*hd]); }
+    translate([o-0.30*wd,-0.5*w,-10]){ cube([0.6*wd, 0.5*w, 0.5*hd]); }
+  }
+}
 
-module hook(wd, hd, rd){
+module hook_finn(wd, hd, slit)
+{
+  if(slit == true)
+  {
+    minkowski(){
+      hook_finn_bare(wd,hd,slit);
+      cube([0.2,0.2,0.2]);
+    }
+  }
+  else
+  {
+    hook_finn_bare(wd,hd,slit);
+  }
+}
+
+
+module hook_mount(wd, hd, rd){
+  //mounting part
+  wh = 1.5*w;
+  difference(){
+  difference(){ union(){
+    translate([0,-w,0.04*hd]) { cube([wd,1.5*w,0.75*hd]); } //long part of the hook 
+    translate([0,-w,0.04*hd]) {rotate([0,90,0]){ cylinder(wd,wh,wh); }}
+    translate([0,-w,79]) {rotate([0,90,0]){ cylinder(wd,wh,wh); }}
+  }
+  translate([-1,-3*w,-10]) { cube([wd+2,2*w,hd]); }
+  }
+  hook_finn(wd,hd, true);
+  }
+}
+      
+
+module hook_hook(wd, hd, rd){
 wh = 1.5*w;
 union(){
+  translate([0,1, 0]){
   translate([0,rd+wh, hd]){
     rotate([0,90,0]){
       difference(){
         cylinder(wd,rd+wh,rd+wh);
         cylinder(wd,rd,rd);  
         translate([0, -rd, 0]){
-          cube([rd+wd,2*rd+wd,wd]);
+          cube([rd+wd,2*rd+wd,wd]);         
         }
      }
     }
@@ -75,7 +118,7 @@ union(){
         rotate([0,90,0]){
             cylinder(wd,wh/2,wh/2);
           }
-      }  
+      }
   shortLen = 2*wh;
   translate([0, 2*rd+wh, hd-shortLen]){
     union(){
@@ -84,13 +127,22 @@ union(){
         rotate([0,90,0]){
             cylinder(wd,wh/2,wh/2);
           }
-      }  
+        }
+      }
     }
   }
-}
+  hook_finn(wd,hd, false);
+
+  }
+  
 }
 
-
+module hook(wd,hd,rd)
+{
+  hook_mount(wd,hd,rd);
+  //hook_hook(wd,hd,rd);
+  
+}
 
 module pillow(b,l,t){
   minkowski(){
@@ -106,24 +158,24 @@ module fertig()
 case();
 offset = 13;
 
-translate([offset,0,w]){
+translate([offset,w,w]){
     hook(15, 100, 2);
 }
 
 
 translate([2+s/2,-t+0.5,hs+4]){
   rotate([90,0,0]){
-    pillow(w/2,20,w/2);
+    pillow(w/2,20,w);
   }
 }
 
 mirror(){
-    translate([offset,0,w]){
+    translate([offset,w,w]){
         hook(15, 100, 2);
     }
     translate([2+s/2,-t+0.5,hs+4]){
   rotate([90,0,0]){
-    pillow(w/2,20,w/2);
+    pillow(w/2,20,w);
   }
 }
 }
@@ -131,7 +183,8 @@ mirror(){
 }
 
 
-rotate([45,0,0]){
+rotate([45,0,0])
+{
   fertig();
 }
 
@@ -152,11 +205,3 @@ module support(b,h,t)
   }
 }
 
-
-translate([13,-60,64.5]){
-  support(15,2,7.5);
-}
-
-translate([-13-15,-60,64.5]){
-  support(15,2,7.5);
-}
