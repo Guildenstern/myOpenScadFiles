@@ -1,0 +1,6 @@
+dist: trusty
+    sudo: true
+    language: generic
+    install:
+  #   - ./3d/scripts/dependencies.sh
+    # - ./electronics/scripts/dependencies.sh
